@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'sample-app'
         DOCKER_TAG = "${BUILD_NUMBER}"
-        REGISTRY = 'localhost:5000' // Change to your registry
+        REGISTRY = 'localhost:5000'
     }
     
     stages {
@@ -19,7 +19,7 @@ pipeline {
             steps {
                 echo 'Building the application...'
                 dir('app') {
-                    sh 'npm install'
+                    bat 'npm install'  // Changed from sh to bat
                 }
             }
         }
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 dir('app') {
-                    sh 'npm test'
+                    bat 'npm test'     // Changed from sh to bat
                 }
             }
         }
@@ -49,17 +49,16 @@ pipeline {
             steps {
                 echo 'Deploying application...'
                 script {
-                    // Stop existing container if running
-                    sh '''
-                        docker stop sample-app-container || true
-                        docker rm sample-app-container || true
+                    // Use bat commands for Windows
+                    bat '''
+                        docker stop sample-app-container || echo "Container not running"
+                        docker rm sample-app-container || echo "Container not found"
                     '''
                     
-                    // Run new container
-                    sh """
-                        docker run -d \
-                        --name sample-app-container \
-                        -p 3000:3000 \
+                    bat """
+                        docker run -d ^
+                        --name sample-app-container ^
+                        -p 3000:3000 ^
                         ${DOCKER_IMAGE}:${DOCKER_TAG}
                     """
                 }
@@ -78,7 +77,6 @@ pipeline {
             echo 'Pipeline failed!'
         }
         cleanup {
-            // Clean up workspace
             cleanWs()
         }
     }
