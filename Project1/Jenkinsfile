@@ -2,48 +2,33 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "tanv04/project1_devops_lab"
-        BRANCH_NAME = "tanvi" // You can also use BRANCH_NAME in the git step
+        BRANCH_NAME = "tanvi" // Your branch name
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: "${BRANCH_NAME}", url: 'https://github.com/TanV-04/DevOps_Lab_5.git'
+                git branch: "tanvi", url: 'https://github.com/TanV-04/DevOps_Lab_5.git'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Set up Python Environment') {
             steps {
                 script {
-                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                    // Ensure Python is installed on the Jenkins agent
+                    bat 'python --version'
+                    bat 'python -m venv venv'
+                    bat 'venv\\Scripts\\activate'
+                    bat 'pip install -r Project1\\requirements.txt'
                 }
             }
         }
 
-        stage('Push to DockerHub') {
+        stage('Run Python App') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    script {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push ${IMAGE_NAME}:latest
-                            docker logout
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('GitHub Push Tag') {
-            steps {
-                sshagent (credentials: ['github-ssh']) {
-                    sh '''
-                        git config user.email "you@example.com"
-                        git config user.name "Your Name"
-                        git tag v${BUILD_NUMBER}
-                        git push origin v${BUILD_NUMBER}
-                    '''
+                script {
+                    // Run the app.py inside the Project1 folder
+                    bat 'venv\\Scripts\\activate && python Project1\\app.py'
                 }
             }
         }
@@ -51,10 +36,10 @@ pipeline {
 
     post {
         success {
-            echo "Build and Push Successful"
+            echo "App executed successfully"
         }
         failure {
-            echo "Pipeline Failed"
+            echo "Pipeline failed"
         }
     }
 }
