@@ -3,20 +3,20 @@ pipeline {
 
     environment {
         IMAGE_NAME = "tanv04/project1_devops_lab"
-        BRANCH_NAME = "tanvi" // or dev or whatever branch
+        BRANCH_NAME = "tanvi" // You can also use BRANCH_NAME in the git step
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch 'tanvi', url:'https://github.com/TanV-04/DevOps_Lab_5/'
+                git branch: "${BRANCH_NAME}", url: 'https://github.com/TanV-04/DevOps_Lab_5.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t %IMAGE_NAME%:latest .'
+                    sh "docker build -t ${IMAGE_NAME}:latest ."
                 }
             }
         }
@@ -25,15 +25,12 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     script {
-                        sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                        sh 'docker push $IMAGE_NAME:$BUILD_NUMBER'
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker push ${IMAGE_NAME}:latest
+                            docker logout
+                        '''
                     }
-                    bat """
-                    echo %DOCKER_PASS% |
-                    docker login -u %DOCKER_USER% --password-stdin
-                    docker push %IMAGE_NAME%:latest
-                    docker logout
-                    """
                 }
             }
         }
@@ -42,6 +39,8 @@ pipeline {
             steps {
                 sshagent (credentials: ['github-ssh']) {
                     sh '''
+                        git config user.email "you@example.com"
+                        git config user.name "Your Name"
                         git tag v${BUILD_NUMBER}
                         git push origin v${BUILD_NUMBER}
                     '''
