@@ -45,29 +45,15 @@ pipeline {
         }
         
         stage('Deploy') {
-    steps {
-        echo 'Deploying application...'
-        
-        // Step 1: Cleanup
-        bat '''
-            @echo off
-            docker stop sample-app-container >nul 2>&1
-            docker rm sample-app-container >nul 2>&1
-            echo Cleanup completed - ready to deploy
-        '''
-        
-        // Step 2: Deploy new container
-        bat "docker run -d --name sample-app-container -p 3000:3000 sample-app:${BUILD_NUMBER}"
-        
-        // Step 3: Verify deployment
-        bat '''
-            echo Verifying deployment...
-            docker ps | findstr sample-app-container
-            echo Container deployed successfully
-        '''
-    }
-}
-
+            steps {
+                echo 'Deploying application...'
+                bat 'docker stop sample-app-container 2>nul || echo Container stopped'
+                bat 'docker rm sample-app-container 2>nul || echo Container removed'  
+                bat "docker run -d --name sample-app-container -p 3000:3000 ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                bat 'docker ps | findstr sample-app-container'
+                echo 'Deployment completed successfully!'
+            }
+        }
     }
     
     post {
