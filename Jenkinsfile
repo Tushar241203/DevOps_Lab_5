@@ -48,19 +48,19 @@ pipeline {
             steps {
                 echo 'Deploying application...'
                 script {
-                    // Windows-compatible container cleanup
+                    // Foolproof cleanup
                     bat '''
-                        docker stop sample-app-container 2>nul
-                        if errorlevel 1 echo Container not running
-                    '''
-                    
-                    bat '''
-                        docker rm sample-app-container 2>nul
-                        if errorlevel 1 echo Container not found
+                        @echo off
+                        docker stop sample-app-container >nul 2>&1
+                        docker rm sample-app-container >nul 2>&1
+                        echo Cleanup completed - ready to deploy
                     '''
                     
                     // Deploy new container
                     bat "docker run -d --name sample-app-container -p 3000:3000 ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    
+                    // Verify deployment
+                    bat 'timeout /t 2 >nul && docker ps | findstr sample-app-container'
                 }
             }
         }
