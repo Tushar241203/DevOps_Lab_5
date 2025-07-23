@@ -47,21 +47,24 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                script {
-                    // Foolproof cleanup
-                    bat '''
-                        @echo off
-                        docker stop sample-app-container >nul 2>&1
-                        docker rm sample-app-container >nul 2>&1
-                        echo Cleanup completed - ready to deploy
-                    '''
-                    
-                    // Deploy new container
-                    bat "docker run -d --name sample-app-container -p 3000:3000 ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    
-                    // Verify deployment
-                    bat 'timeout /t 2 >nul && docker ps | findstr sample-app-container'
-                }
+                
+                // Cleanup existing container
+                bat '''
+                    @echo off
+                    docker stop sample-app-container >nul 2>&1
+                    docker rm sample-app-container >nul 2>&1
+                    echo Cleanup completed - ready to deploy
+                '''
+                
+                // Deploy new container
+                bat "docker run -d --name sample-app-container -p 3000:3000 sample-app:${BUILD_NUMBER}"
+                
+                // Verify deployment
+                bat '''
+                    timeout /t 3 >nul
+                    docker ps | findstr sample-app-container
+                    echo Deployment verification completed
+                '''
             }
         }
     }
