@@ -47,11 +47,20 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                bat 'docker stop sample-app-container 2>nul || echo Container stopped'
-                bat 'docker rm sample-app-container 2>nul || echo Container removed'  
-                bat "docker run -d --name sample-app-container -p 3000:3000 ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                bat 'docker ps | findstr sample-app-container'
-                echo 'Deployment completed successfully!'
+                
+                powershell '''
+                    # Stop and remove existing container (ignore errors)
+                    try { docker stop sample-app-container } catch { Write-Host "Container not running" }
+                    try { docker rm sample-app-container } catch { Write-Host "Container not found" }
+                    
+                    # Deploy new container
+                    docker run -d --name sample-app-container -p 3000:3000 sample-app:$env:BUILD_NUMBER
+                    
+                    # Verify deployment
+                    Start-Sleep -Seconds 2
+                    docker ps | Where-Object { $_ -match "sample-app-container" }
+                    Write-Host "Deployment completed successfully!"
+                '''
             }
         }
     }
