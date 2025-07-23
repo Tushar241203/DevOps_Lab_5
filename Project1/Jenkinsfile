@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "tanv04/project1_devops_lab"
+        BRANCH_NAME = "tanvi" // or dev or whatever branch
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch 'tanvi', url:'https://github.com/TanV-04/DevOps_Lab_5/'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t %IMAGE_NAME%:latest .'
+                }
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                        sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                        sh 'docker push $IMAGE_NAME:$BUILD_NUMBER'
+                    }
+                    bat """
+                    echo %DOCKER_PASS% |
+                    docker login -u %DOCKER_USER% --password-stdin
+                    docker push %IMAGE_NAME%:latest
+                    docker logout
+                    """
+                }
+            }
+        }
+
+        stage('GitHub Push Tag') {
+            steps {
+                sshagent (credentials: ['github-ssh']) {
+                    sh '''
+                        git tag v${BUILD_NUMBER}
+                        git push origin v${BUILD_NUMBER}
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Build and Push Successful"
+        }
+        failure {
+            echo "Pipeline Failed"
+        }
+    }
+}
