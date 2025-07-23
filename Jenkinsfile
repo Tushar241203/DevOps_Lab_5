@@ -37,7 +37,7 @@ pipeline {
                 echo 'Building Docker image...'
                 script {
                     dir('app') {
-                        // Build the image
+                        // Build the image with build number tag
                         bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                         
                         // Tag as latest
