@@ -37,10 +37,7 @@ pipeline {
                 echo 'Building Docker image...'
                 script {
                     dir('app') {
-                        // Build the image with build number tag
                         bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                        
-                        // Tag as latest
                         bat "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
                     }
                 }
@@ -48,19 +45,25 @@ pipeline {
         }
         
         stage('Deploy') {
-    steps {
-        echo 'Deploying application...'
-        script {
-            // Stop existing container if running
-            bat 'docker stop sample-app-container || echo "Container not running"'
-            bat 'docker rm sample-app-container || echo "Container not found"'
-            
-            // Run new container
-            bat "docker run -d --name sample-app-container -p 3000:3000 ${DOCKER_IMAGE}:${DOCKER_TAG}"
+            steps {
+                echo 'Deploying application...'
+                script {
+                    // Windows-compatible container cleanup
+                    bat '''
+                        docker stop sample-app-container 2>nul
+                        if errorlevel 1 echo Container not running
+                    '''
+                    
+                    bat '''
+                        docker rm sample-app-container 2>nul
+                        if errorlevel 1 echo Container not found
+                    '''
+                    
+                    // Deploy new container
+                    bat "docker run -d --name sample-app-container -p 3000:3000 ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+            }
         }
-    }
-}
-
     }
     
     post {
