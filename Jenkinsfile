@@ -4,7 +4,6 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'sample-app'
         DOCKER_TAG = "${BUILD_NUMBER}"
-        REGISTRY = 'localhost:5000'
     }
     
     stages {
@@ -19,7 +18,7 @@ pipeline {
             steps {
                 echo 'Building the application...'
                 dir('app') {
-                    bat 'npm install'  // Changed from sh to bat
+                    bat 'npm install'
                 }
             }
         }
@@ -28,7 +27,7 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 dir('app') {
-                    bat 'npm test'     // Changed from sh to bat
+                    bat 'npm test'
                 }
             }
         }
@@ -38,8 +37,11 @@ pipeline {
                 echo 'Building Docker image...'
                 script {
                     dir('app') {
-                        def image = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").tag("${DOCKER_IMAGE}:latest")
+                        // Build the image
+                        bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                        
+                        // Tag as latest
+                        bat "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
                     }
                 }
             }
@@ -49,12 +51,13 @@ pipeline {
             steps {
                 echo 'Deploying application...'
                 script {
-                    // Use bat commands for Windows
+                    // Stop existing container if running
                     bat '''
                         docker stop sample-app-container || echo "Container not running"
                         docker rm sample-app-container || echo "Container not found"
                     '''
                     
+                    // Run new container
                     bat """
                         docker run -d ^
                         --name sample-app-container ^
