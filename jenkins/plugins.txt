@@ -1,0 +1,6 @@
+docker-workflow:563.vd5d2e5c4007f
+pipeline-stage-view:2.25
+git:4.13.0
+workflow-aggregator:590.v6a_d052e5a_a_b_5
+blueocean:1.25.2
+docker-plugin:1.2.9
