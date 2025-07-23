@@ -48,25 +48,19 @@ pipeline {
         }
         
         stage('Deploy') {
-            steps {
-                echo 'Deploying application...'
-                script {
-                    // Stop existing container if running
-                    bat '''
-                        docker stop sample-app-container || echo "Container not running"
-                        docker rm sample-app-container || echo "Container not found"
-                    '''
-                    
-                    // Run new container
-                    bat """
-                        docker run -d ^
-                        --name sample-app-container ^
-                        -p 3000:3000 ^
-                        ${DOCKER_IMAGE}:${DOCKER_TAG}
-                    """
-                }
-            }
+    steps {
+        echo 'Deploying application...'
+        script {
+            // Stop existing container if running
+            bat 'docker stop sample-app-container || echo "Container not running"'
+            bat 'docker rm sample-app-container || echo "Container not found"'
+            
+            // Run new container
+            bat "docker run -d --name sample-app-container -p 3000:3000 ${DOCKER_IMAGE}:${DOCKER_TAG}"
         }
+    }
+}
+
     }
     
     post {
