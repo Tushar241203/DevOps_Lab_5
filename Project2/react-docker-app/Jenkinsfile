@@ -1,0 +1,55 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE_NAME = 'react-docker-app-react-prod'
+    CONTAINER_NAME = 'react-prod'
+  }
+
+
+  stages {
+    stage('Clone') {
+      steps {
+        git 'https://github.com/your-username/react-docker-app.git'
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        script {
+          sh 'docker build -t $IMAGE_NAME .'
+        }
+      }
+    }
+
+    stage('Stop Existing Container') {
+      steps {
+        script {
+          sh '''
+            if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+              docker stop $CONTAINER_NAME || true
+              docker rm $CONTAINER_NAME || true
+            fi
+          '''
+        }
+      }
+    }
+
+    stage('Run Docker Container') {
+      steps {
+        script {
+          sh 'docker run -d -p 8080:80 --name $CONTAINER_NAME $IMAGE_NAME'
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo 'Deployment successful! App is live at http://localhost:8080'
+    }
+    failure {
+      echo 'Build failed.'
+    }
+  }
+}
