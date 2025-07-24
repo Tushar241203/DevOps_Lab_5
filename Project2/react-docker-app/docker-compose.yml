@@ -1,0 +1,24 @@
+services:
+  react-dev:
+    container_name: react-vite-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: npm run dev -- --host
+
+  react-prod:
+    container_name: react-vite-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    depends_on:
+      - react-dev
