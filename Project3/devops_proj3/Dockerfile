@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:21
 WORKDIR /app
-COPY target/my-java-app-1.0-SNAPSHOT.jar app.jar
+COPY target/devops_proj3-1.0-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
