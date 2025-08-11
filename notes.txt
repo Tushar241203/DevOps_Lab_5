@@ -1,5 +1,0 @@
-Your Jenkinsfile controls the process and calls the build commands.
-
-Your Dockerfile controls how your built app is packaged into an image.
-
-Both work with your actual source code to automate building and deploying.
