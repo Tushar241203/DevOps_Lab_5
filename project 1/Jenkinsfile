@@ -6,6 +6,15 @@ pipeline {
         IMAGE_TAG = "latest"
     }
 
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                // This command wipes the workspace before starting
+                cleanWs()
+            }
+        }
+
     stages {
         stage('Clone Repository') {
             steps {
