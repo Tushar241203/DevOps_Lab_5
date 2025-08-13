@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  jenkins-master:
+    image: jenkins/jenkins:lts
+    container_name: jenkins-master
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    networks:
+      - jenkins
+
+  builder:
+    build:
+      context: ./agent
+    container_name: jenkins-builder
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080
+      - JENKINS_AGENT_NAME=builder
+      - JENKINS_AGENT_WORKDIR=/home/jenkins
+      - JENKINS_SECRET=${BUILDER_SECRET}
+    command: >
+      bash -c "curl -o agent.jar $${JENKINS_URL}/jnlpJars/agent.jar &&
+               java -jar agent.jar
+               -jnlpUrl $${JENKINS_URL}/computer/$${JENKINS_AGENT_NAME}/jenkins-agent.jnlp
+               -secret $${JENKINS_SECRET}
+               -workDir $${JENKINS_AGENT_WORKDIR}"
+    depends_on:
+      - jenkins-master
+    networks:
+      - jenkins
+
+  tester:
+    build:
+      context: ./agent
+    container_name: jenkins-tester
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080
+      - JENKINS_AGENT_NAME=tester
+      - JENKINS_AGENT_WORKDIR=/home/jenkins
+      - JENKINS_SECRET=${TESTER_SECRET}
+    command: >
+      bash -c "curl -o agent.jar $${JENKINS_URL}/jnlpJars/agent.jar &&
+               java -jar agent.jar
+               -jnlpUrl $${JENKINS_URL}/computer/$${JENKINS_AGENT_NAME}/jenkins-agent.jnlp
+               -secret $${JENKINS_SECRET}
+               -workDir $${JENKINS_AGENT_WORKDIR}"
+    depends_on:
+      - jenkins-master
+    networks:
+      - jenkins
+
+volumes:
+  jenkins_home:
+
+networks:
+  jenkins:

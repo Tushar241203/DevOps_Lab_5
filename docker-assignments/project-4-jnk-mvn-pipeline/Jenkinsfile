@@ -1,0 +1,37 @@
+pipeline {
+  agent none
+  tools {
+    jdk 'jdk17'
+    maven 'maven-3.9'
+  }
+  stages {
+    stage('Checkout') {
+      agent any
+      steps {
+        deleteDir()
+        checkout scm
+        stash name: 'source', includes: '**/*'
+      }
+    }
+    stage('Compile on builder') {
+      agent { label 'builder' }
+      steps {
+        unstash 'source'
+        sh 'mvn clean package -DskipTests'
+        stash name: 'built', includes: '**/*'
+      }
+    }
+    stage('Test on tester') {
+      agent { label 'tester' }
+      steps {
+        unstash 'built'
+        sh 'mvn test'
+      }
+      post {
+        always {
+          junit '**/target/surefire-reports/*.xml'
+        }
+      }
+    }
+  }
+}
