@@ -1,0 +1,24 @@
+<div class="container">
+  <h1>{{ title }}</h1>
+
+  <div class="status">
+    🚀 Application is running successfully in Docker!
+    <br />
+    Current Time: {{ currentTime | date : "medium" }}
+  </div>
+
+  <h2>Features:</h2>
+  <ul class="feature-list">
+    <li *ngFor="let feature of features">✅ {{ feature }}</li>
+  </ul>
+
+  <div style="text-align: center; margin-top: 30px">
+    <p>This Angular application is:</p>
+    <ul style="text-align: left; display: inline-block">
+      <li>Built using Angular CLI</li>
+      <li>Containerized with Docker</li>
+      <li>Served with Nginx in production</li>
+      <li>Configured with Docker Compose</li>
+    </ul>
+  </div>
+</div>
