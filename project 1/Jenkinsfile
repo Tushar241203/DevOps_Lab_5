@@ -6,7 +6,6 @@ pipeline {
         IMAGE_TAG = "latest"
     }
 
-
     stages {
         stage('Clean Workspace') {
             steps {
@@ -15,7 +14,6 @@ pipeline {
             }
         }
 
-    stages {
         stage('Clone Repository') {
             steps {
                 git branch: 'Sushrut', url: 'https://github.com/TanV-04/DevOps_Lab_5.git'
@@ -49,5 +47,4 @@ pipeline {
             }
         }
     }
-}
 }
