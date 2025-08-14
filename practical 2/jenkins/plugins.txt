@@ -1,0 +1,6 @@
+docker-workflow
+pipeline-stage-view
+git
+workflow-aggregator
+blueocean
+docker-plugin
