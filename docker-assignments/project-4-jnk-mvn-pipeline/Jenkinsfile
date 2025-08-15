@@ -10,16 +10,17 @@ pipeline {
             steps {
                 deleteDir()
                 checkout scm
-                stash name: 'source', includes: '**/*'
+                // Stash only maven-project contents so we can build directly
+                dir('maven-project') {
+                    stash name: 'source', includes: '**/*'
+                }
             }
         }
         stage('Compile on builder') {
             agent { label 'builder' }
             steps {
                 unstash 'source'
-                dir('maven-project') {
-                    sh 'mvn clean package -DskipTests'
-                }
+                sh 'mvn clean package -DskipTests'
                 stash name: 'built', includes: '**/*'
             }
         }
@@ -27,13 +28,11 @@ pipeline {
             agent { label 'tester' }
             steps {
                 unstash 'built'
-                dir('maven-project') {
-                    sh 'mvn test'
-                }
+                sh 'mvn test'
             }
             post {
                 always {
-                    junit 'maven-project/target/surefire-reports/*.xml'
+                    junit 'target/surefire-reports/*.xml'
                 }
             }
         }
