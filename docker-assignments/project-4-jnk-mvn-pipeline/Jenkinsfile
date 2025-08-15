@@ -10,32 +10,32 @@ pipeline {
             steps {
                 deleteDir()
                 checkout scm
-                dir('maven-project') {
-                    stash name: 'source', includes: '**/*'
-                }
+                stash name: 'source', includes: '**/*'
             }
         }
+        
         stage('Compile on builder') {
             agent { label 'builder' }
             steps {
-                dir('maven-project') {
-                    unstash 'source'
+                unstash 'source'
+                dir('docker-assignments/project-4-jnk-mvn-pipeline/maven-project') {
                     sh 'mvn clean package -DskipTests'
-                    stash name: 'built', includes: '**/*'
                 }
+                stash name: 'built', includes: '**/*'
             }
         }
+        
         stage('Test on tester') {
             agent { label 'tester' }
             steps {
-                dir('maven-project') {
-                    unstash 'built'
+                unstash 'built'
+                dir('docker-assignments/project-4-jnk-mvn-pipeline/maven-project') {
                     sh 'mvn test'
                 }
             }
             post {
                 always {
-                    junit 'maven-project/target/surefire-reports/*.xml'
+                    junit 'docker-assignments/project-4-jnk-mvn-pipeline/maven-project/target/surefire-reports/*.xml'
                 }
             }
         }
