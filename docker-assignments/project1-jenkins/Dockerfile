@@ -3,4 +3,3 @@ WORKDIR /app
 COPY App.class .
 EXPOSE 8080
 CMD ["java", "App"]
-EOF
