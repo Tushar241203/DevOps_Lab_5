@@ -4,58 +4,52 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                dir('docker-assignments/project1-jenkins') {
-                    echo 'Checking out code...'
-                    checkout scm
-                }
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+        
+        stage('List Files') {
+            steps {
+                echo 'Listing files in workspace...'
+                sh 'find . -name "*.java" -type f'
+                sh 'find . -name "Dockerfile" -type f'
             }
         }
         
         stage('Build') {
             steps {
-                dir('docker-assignments/project1-jenkins') {
-                    echo 'Building Java application...'
-                    sh 'javac App.java'
-                }
+                echo 'Building Java application...'
+                sh 'cd docker-assignments/project1-jenkins && ls -la'
+                sh 'cd docker-assignments/project1-jenkins && javac App.java'
             }
         }
         
         stage('Test') {
             steps {
-                dir('docker-assignments/project1-jenkins') {
-                    echo 'Running tests...'
-                    sh 'java App'
-                }
+                echo 'Running tests...'
+                sh 'cd docker-assignments/project1-jenkins && java App'
             }
         }
         
         stage('Docker Build') {
             steps {
-                dir('docker-assignments/project1-jenkins') {
-                    echo 'Building Docker image...'
-                    script {
-                        def image = docker.build("my-java-app:${BUILD_NUMBER}")
-                    }
-                }
+                echo 'Building Docker image...'
+                sh 'cd docker-assignments/project1-jenkins && docker build -t my-java-app:${BUILD_NUMBER} .'
             }
         }
         
-        stage('Docker Run') {
+        stage('Docker Run Test') {
             steps {
-                dir('docker-assignments/project1-jenkins') {
-                    echo 'Running Docker container...'
-                    script {
-                        docker.image("my-java-app:${BUILD_NUMBER}").run()
-                    }
-                }
+                echo 'Testing Docker container...'
+                sh 'docker run --rm my-java-app:${BUILD_NUMBER}'
             }
         }
         
         stage('Deploy') {
             steps {
-                dir('docker-assignments/project1-jenkins') {
-                    echo 'Deployment completed successfully!'
-                }
+                echo 'Deployment completed successfully!'
+                echo "Docker image my-java-app:${BUILD_NUMBER} built successfully"
             }
         }
     }
