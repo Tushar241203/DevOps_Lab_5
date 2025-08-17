@@ -3,28 +3,28 @@ pipeline {
     
     stages {
         stage('Checkout') {
-            steps {
+            steps dir('docker-assignments/project1-jenkins') {
                 echo 'Checking out code...'
                 checkout scm
             }
         }
         
         stage('Build') {
-            steps {
+            steps dir('docker-assignments/project1-jenkins') {
                 echo 'Building Java application...'
                 sh 'javac App.java'
             }
         }
         
         stage('Test') {
-            steps {
+            steps dir('docker-assignments/project1-jenkins') {
                 echo 'Running tests...'
                 sh 'java App'
             }
         }
         
         stage('Docker Build') {
-            steps {
+            steps dir('docker-assignments/project1-jenkins') {
                 echo 'Building Docker image...'
                 script {
                     def image = docker.build("my-java-app:${BUILD_NUMBER}")
@@ -33,7 +33,7 @@ pipeline {
         }
         
         stage('Docker Run') {
-            steps {
+            steps dir('docker-assignments/project1-jenkins') {
                 echo 'Running Docker container...'
                 script {
                     docker.image("my-java-app:${BUILD_NUMBER}").run()
@@ -42,7 +42,7 @@ pipeline {
         }
         
         stage('Deploy') {
-            steps {
+            steps dir('docker-assignments/project1-jenkins') {
                 echo 'Deployment completed successfully!'
             }
         }
