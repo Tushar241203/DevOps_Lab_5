@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo 'Building Java application...'
+                sh 'javac App.java'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                sh 'java App'
+            }
+        }
+        
+        stage('Docker Build') {
+            steps {
+                echo 'Building Docker image...'
+                script {
+                    def image = docker.build("my-java-app:${BUILD_NUMBER}")
+                }
+            }
+        }
+        
+        stage('Docker Run') {
+            steps {
+                echo 'Running Docker container...'
+                script {
+                    docker.image("my-java-app:${BUILD_NUMBER}").run()
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                echo 'Deployment completed successfully!'
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline completed!'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
