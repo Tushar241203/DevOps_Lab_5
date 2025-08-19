@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Install Dependencies') {
             steps {
-                dir('Practical 1') {   // Change to your project directory
+                dir('Practical_1') {   // Change to your project directory
                     sh 'npm install'
                 }
             }
