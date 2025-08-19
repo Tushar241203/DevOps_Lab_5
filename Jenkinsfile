@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs "NodeJS_24"   // use the name you configured
+    }
+
     stages {
         stage('Install Dependencies') {
             steps {
@@ -16,14 +20,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Building the Node.js app...'
                 sh 'npm run build'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying the app (dummy step)...'
+                echo 'Deploying app (dummy step)...'
             }
         }
     }
