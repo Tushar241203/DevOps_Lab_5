@@ -1,14 +1,16 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs "NodeJS_24"
-    }
-
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'Mahesh_Kharote_517', url: 'https://github.com/TanV-04/DevOps_Lab_5.git'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                dir('Practical_1') {   // Change to your project directory
+                dir('Practical_1') {
                     sh 'npm install'
                 }
             }
@@ -16,7 +18,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                dir('Practical 1') {
+                dir('Practical_1') {
                     sh 'npm test'
                 }
             }
@@ -24,15 +26,17 @@ pipeline {
 
         stage('Build') {
             steps {
-                dir('Practical 1') {
-                    sh 'npm run build'
+                dir('Practical_1') {
+                    echo 'Building the Node.js app...'
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying app (dummy step)...'
+                dir('Practical_1') {
+                    echo 'Deploying the app (dummy step)...'
+                }
             }
         }
     }
