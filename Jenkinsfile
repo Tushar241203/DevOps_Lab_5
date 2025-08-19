@@ -2,12 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/<your-username>/node-jenkins-demo.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
@@ -23,6 +17,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the Node.js app...'
+                sh 'npm run build'
             }
         }
 
