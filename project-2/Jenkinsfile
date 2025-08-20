@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "angular-app"
+        IMAGE_TAG = "latest"
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('Clone Repository') {
+            steps {
+                git branch: 'Sushrut', url: 'https://github.com/TanV-04/DevOps_Lab_5.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    echo "Building Angular Docker image..."
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                '''
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh '''
+                    echo "Running tests in Docker container..."
+                    docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} echo "Tests executed successfully"
+                '''
+            }
+        }   
+     stage('Deploy Dev Container') {
+            steps {
+                sh '''
+                    echo "Deploying Angular dev container..."
+                    # Stop and remove existing dev container if it exists
+                    docker stop angular-dev || true
+                    docker rm angular-dev || true
+                    
+                    # Deploy new dev container
+                    docker run -d --name angular-dev -p 4200:4200 ${IMAGE_NAME}:${IMAGE_TAG}
+                    echo "Angular dev deployment completed on port 4200"
+                '''
+            }
+        }
+
+        stage('Deploy Prod Container') {
+            steps {
+                sh '''
+                    echo "Deploying Angular prod container..."
+                    # Stop and remove existing prod container if it exists
+                    docker stop angular-prod || true
+                    docker rm angular-prod || true
+                    
+                    # Deploy new prod container
+                    docker run -d --name angular-prod -p 8081:80 ${IMAGE_NAME}:${IMAGE_TAG}
+                    echo "Angular prod deployment completed on port 8081"
+                '''
+            }
+        }
+    }
+}

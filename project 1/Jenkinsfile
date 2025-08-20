@@ -9,7 +9,6 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                // This command wipes the workspace before starting
                 cleanWs()
             }
         }
@@ -20,11 +19,30 @@ pipeline {
             }
         }
 
+        stage('List Files') {
+            steps {
+                sh '''
+                    echo "Files in root directory:"
+                    ls -la
+                    echo "Files in project 1 directory:"
+                    ls -la "project 1/" || echo "project 1 directory not found"
+                '''
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh '''
                     echo "Building Docker image..."
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    if [ -f "project 1/Dockerfile" ]; then
+                        cd "project 1"
+                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    elif [ -f "Dockerfile" ]; then
+                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    else
+                        echo "Dockerfile not found in root or project 1 directory"
+                        exit 1
+                    fi
                 '''
             }
         }
@@ -42,7 +60,11 @@ pipeline {
             steps {
                 sh '''
                     echo "Deploying container..."
-                    docker run -d --name my-app-container -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG}
+                    # Stop and remove existing container if it exists
+                    docker stop my-app-container || true
+                    docker rm my-app-container || true
+                    # Run new container
+                    docker run -d --name my-app-container -p 3000:3000 ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
