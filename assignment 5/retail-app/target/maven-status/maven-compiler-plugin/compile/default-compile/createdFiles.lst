@@ -1,0 +1,5 @@
+com\retailcompany\service\ProductService.class
+com\retailcompany\entity\Product.class
+com\retailcompany\repository\ProductRepository.class
+com\retailcompany\controller\ProductController.class
+com\retailcompany\RetailApplication.class

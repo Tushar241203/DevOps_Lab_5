@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  retail-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - retail-network
+    depends_on:
+      - retail-db
+
+  retail-db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=retaildb
+      - POSTGRES_USER=retailuser
+      - POSTGRES_PASSWORD=retailpass
+    ports:
+      - "5432:5432"
+    networks:
+      - retail-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Optional: Add Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - retail-network
+
+networks:
+  retail-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
