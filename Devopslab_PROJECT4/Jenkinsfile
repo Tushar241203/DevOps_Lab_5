@@ -11,13 +11,17 @@ pipeline {
     stage('Compile') {
       agent { label 'compile' }
       steps {
-        bat 'mvn clean compile'
+        dir('Devopslab_PROJECT4') {
+          bat 'mvn clean compile'
+        }
       }
     }
     stage('Test') {
       agent { label 'test' }
       steps {
-        bat 'mvn test'
+        dir('Devopslab_PROJECT4') {
+          bat 'mvn test'
+        }
       }
     }
   }
