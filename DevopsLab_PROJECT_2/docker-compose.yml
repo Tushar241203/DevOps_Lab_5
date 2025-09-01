@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  angular-dev:
+    build:
+      context: .
+      dockerfile: docker/development/Dockerfile
+    container_name: angular-dev-container
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./angular-app:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # For file watching on Windows
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    networks:
+      - angular-network
+
+networks:
+  angular-network:
+    driver: bridge

@@ -1,0 +1,12 @@
+# Update .dockerignore to allow the dist folder
+@'
+angular-app/node_modules
+angular-app/.angular
+**/.git
+**/.gitignore
+**/README.md
+**/npm-debug.log
+**/coverage
+**/.DS_Store
+**/.vscode
+'@ | Out-File -FilePath ".dockerignore" -Encoding UTF8

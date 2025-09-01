@@ -1,0 +1,25 @@
+@'
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Docker
+.docker/
+
+# Angular
+/dist/
+/tmp/
+/out-tsc/
+/bazel-out/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+'@ | Out-File -FilePath ".gitignore" -Encoding UTF8

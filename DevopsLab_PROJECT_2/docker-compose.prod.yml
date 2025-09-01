@@ -1,0 +1,12 @@
+
+services:
+  angular-prod:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+    container_name: angular-prod-container
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
