@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>Devops_Project_4</groupId>
-  <artifactId>DevopsLab</artifactId>
+  <groupId>devopslab</groupId>
+  <artifactId>Devopslab_PROJECT4</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>DevopsLab</name>
+  <name>Devopslab_PROJECT4</name>
   <url>http://maven.apache.org</url>
 
   <properties>

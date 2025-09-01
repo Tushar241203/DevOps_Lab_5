@@ -1,4 +1,4 @@
-package Devops_Project_4.DevopsLab;
+package devopslab.Devopslab_PROJECT4;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
