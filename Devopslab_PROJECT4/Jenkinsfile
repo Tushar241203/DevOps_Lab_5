@@ -24,18 +24,22 @@ pipeline {
         }
       }
     }
+
     stage('Package') {
         agent { label 'compile' }
         steps {
-            bat 'mvn clean package'
+            dir('Devopslab_PROJECT4') {
+                bat 'mvn clean package'
+            }
         }
     }
-    
+
     stage('Archive') {
         steps {
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'Devopslab_PROJECT4/target/*.jar', fingerprint: true
         }
     }
+
 
   }
 }
