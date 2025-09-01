@@ -35,10 +35,12 @@ pipeline {
     }
 
     stage('Archive') {
+        agent any
         steps {
             archiveArtifacts artifacts: 'Devopslab_PROJECT4/target/*.jar', fingerprint: true
         }
     }
+
 
 
   }
