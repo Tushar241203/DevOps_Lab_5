@@ -1,7 +1,8 @@
 version: '3.8'
 services:
   tanvi-app:
-    image: tanv04/tanvi-app:latest
+    image: rohit065/rohitraj-app:latest
     expose:
       - "8080"
     restart: always
+
