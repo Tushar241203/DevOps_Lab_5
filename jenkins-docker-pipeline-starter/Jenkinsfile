@@ -1,0 +1,74 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE = "rohit065/hello-node"
+    VERSION = "${env.BUILD_NUMBER}"
+  }
+
+  options {
+    timestamps()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Unit tests (Dockerized)') {
+      steps {
+        script {
+          docker.image('node:18-alpine').inside('-v $HOME/.npm:/root/.npm') {
+            sh '''
+              cd app
+              npm ci
+              npm test
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Build Docker image') {
+      steps {
+        sh '''
+          docker build -t $IMAGE:$VERSION -t $IMAGE:latest .
+        '''
+      }
+    }
+
+    stage('Push to Registry') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+          sh '''
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+            docker push $IMAGE:$VERSION
+            docker push $IMAGE:latest
+          '''
+        }
+      }
+    }
+
+    stage('Deploy (Docker Compose)') {
+      when { expression { fileExists('docker-compose.yml') } }
+      steps {
+        sh '''
+          docker compose pull web || docker-compose pull web
+          docker compose up -d web || docker-compose up -d web
+          docker image prune -f || true
+        '''
+      }
+    }
+  }
+
+  post {
+    always {
+      sh 'docker logout || true'
+    }
+    success {
+      echo "Deployed $IMAGE:$VERSION"
+    }
+  }
+}
