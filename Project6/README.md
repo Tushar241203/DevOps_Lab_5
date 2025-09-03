@@ -1,10 +1,1 @@
-For quick testing, I'm creating an Nginx app.
-
-Results:
-- this app was successfully stress tested (i.e. CPU load was successfully simulated and autoscaling was triggered)
-  - HPA scaled up replicas from 1 to 3 based on CPU usage hitting 115% (check screenshots)
-  - new pods moved through Pending -> ContainerCreating -> Running states
-  - the CPU usage dropped back down, and the replicas scaled back to 1 afterward (expected as load decreases)
-  - CPU-heavy while :; do x=$((x+1)); done loop inside the pod is a way to burn CPU cycles and create load
-
-Run kubectl top nodes to see current CPU usage on each pod.
+To quickly test autoscaling, an Nginx-based application was deployed and subjected to a simulated CPU load. The stress test was successful — the Horizontal Pod Autoscaler (HPA) detected high CPU usage, which spiked to around 115%, and automatically increased the number of pod replicas from 1 to 3. During this scale-up process, the new pods correctly moved through the states of Pending, ContainerCreating, and finally Running. After the artificial load was removed, CPU usage dropped, and the HPA scaled the replicas back down to 1 as expected. To generate the CPU load, a simple infinite loop (while :; do x=$((x+1)); done) was executed inside the pod, which effectively burned CPU cycles. For real-time monitoring, the kubectl top nodes command can be used to check CPU usage across the cluster.
