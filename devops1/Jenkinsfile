@@ -5,7 +5,7 @@ pipeline {
         APP_NAME = 'flask-demo'
         IMAGE = "${env.DOCKERHUB_USER ?: 'your-dockerhub-username'}/${APP_NAME}"
         TAG = "${env.BUILD_NUMBER}"
-        DOCKER_HOST = 'tcp://dind:2375' // provided by docker-compose
+        DOCKER_HOST = 'tcp://dind:2375'
     }
 
     stages {
@@ -18,10 +18,10 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 dir('app') {
-                    sh 'python --version || true'
-                    sh 'pip --version || true'
-                    sh 'python -m pip install -r requirements.txt'
-                    sh 'pytest -q'
+                    sh 'python3 --version || true'
+                    sh 'pip3 --version || true'
+                    sh 'pip3 install -r requirements.txt'
+                    sh 'python3 -m pytest -q'
                 }
             }
         }
@@ -54,7 +54,7 @@ pipeline {
 
         stage('Smoke Test') {
             steps {
-                sh 'sleep 2' // give the container a moment
+                sh 'sleep 5'
                 sh 'curl -fsS http://localhost:8000/ | tee smoke.json'
             }
         }
