@@ -20,41 +20,12 @@ pipeline {
     stage('Unit tests (Dockerized)') {
       steps {
         script {
-          // Direct Docker command without Docker plugin
-          try {
-            if (isUnix()) {
-              // Linux/Mac
-              sh '''
-                docker run --rm -v "$(pwd)/app:/app" -w /app node:18-alpine sh -c "npm ci && npm test"
-              '''
-            } else {
-              // Windows
-              bat '''
-                docker run --rm -v "%CD%\\app:/app" -w /app node:18-alpine sh -c "npm ci && npm test"
-              '''
-            }
-          } catch (Exception e) {
-            echo "Docker test failed: ${e.getMessage()}"
-            echo "Falling back to local Node.js if available"
-            
-            // Fallback to local Node.js (if installed)
-            try {
-              if (isUnix()) {
-                sh '''
-                  cd app
-                  npm ci
-                  npm test
-                '''
-              } else {
-                bat '''
-                  cd app
-                  npm ci
-                  npm test
-                '''
-              }
-            } catch (Exception fallbackError) {
-              echo "Local Node.js also not available. Skipping tests."
-            }
+          docker.image('node:18-alpine').inside('-v $HOME/.npm:/root/.npm') {
+            sh '''
+              cd app
+              npm ci
+              npm test
+            '''
           }
         }
       }
@@ -62,38 +33,20 @@ pipeline {
 
     stage('Build Docker image') {
       steps {
-        script {
-          if (isUnix()) {
-            sh '''
-              docker build -t $IMAGE:$VERSION -t $IMAGE:latest .
-            '''
-          } else {
-            bat '''
-              docker build -t %IMAGE%:%VERSION% -t %IMAGE%:latest .
-            '''
-          }
-        }
+        sh '''
+          docker build -t $IMAGE:$VERSION -t $IMAGE:latest .
+        '''
       }
     }
 
     stage('Push to Registry') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
-          script {
-            if (isUnix()) {
-              sh '''
-                echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
-                docker push $IMAGE:$VERSION
-                docker push $IMAGE:latest
-              '''
-            } else {
-              bat '''
-                echo %DOCKERHUB_PASS% | docker login -u %DOCKERHUB_USER% --password-stdin
-                docker push %IMAGE%:%VERSION%
-                docker push %IMAGE%:latest
-              '''
-            }
-          }
+          sh '''
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+            docker push $IMAGE:$VERSION
+            docker push $IMAGE:latest
+          '''
         }
       }
     }
@@ -101,40 +54,21 @@ pipeline {
     stage('Deploy (Docker Compose)') {
       when { expression { fileExists('docker-compose.yml') } }
       steps {
-        script {
-          if (isUnix()) {
-            sh '''
-              docker compose pull web || docker-compose pull web
-              docker compose up -d web || docker-compose up -d web
-              docker image prune -f || true
-            '''
-          } else {
-            bat '''
-              docker compose pull web || docker-compose pull web
-              docker compose up -d web || docker-compose up -d web
-              docker image prune -f || exit 0
-            '''
-          }
-        }
+        sh '''
+          docker compose pull web || docker-compose pull web
+          docker compose up -d web || docker-compose up -d web
+          docker image prune -f || true
+        '''
       }
     }
   }
 
   post {
     always {
-      script {
-        if (isUnix()) {
-          sh 'docker logout || true'
-        } else {
-          bat 'docker logout || exit 0'
-        }
-      }
+      sh 'docker logout || true'
     }
     success {
-      echo "Deployed ${IMAGE}:${VERSION}"
-    }
-    failure {
-      echo "Pipeline failed. Check logs for details."
+      echo "Deployed $IMAGE:$VERSION"
     }
   }
 }
