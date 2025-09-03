@@ -1,16 +1,15 @@
 jenkins:
-systemMessage: |
-Jenkins configured via JCasC. Happy building!\n
-numExecutors: 2
-securityRealm:
-local:
-allowsSignup: false
-users:
-- id: ${JENKINS_ADMIN_ID}
-password: ${JENKINS_ADMIN_PASSWORD}
-authorizationStrategy:
-loggedInUsersCanDoAnything:
-allowAnonymousRead: false
+  systemMessage: "Jenkins configured via JCasC"
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          password: admin1234
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
 unclassified:
-location:
-url: http://localhost:8080/
+  location:
+    url: http://localhost:8080/
