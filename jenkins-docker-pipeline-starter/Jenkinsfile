@@ -22,8 +22,8 @@ pipeline {
         bat '''
           docker run --rm ^
             -v "%WORKSPACE%":/app ^
-            -w /app/app ^
-            node:18-alpine sh -c "npm ci || npm install && npm test"
+            -w /app ^
+            node:18-alpine sh -c "cd app && npm install && npm test"
         '''
       }
     }
