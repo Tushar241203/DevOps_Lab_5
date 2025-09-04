@@ -1,0 +1,30 @@
+
+name: ci
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node (example)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install
+        run: |
+          if [ -f package.json ]; then npm ci; else echo "No package.json, skipping install"; fi
+      - name: Build
+        run: |
+          if [ -f package.json ]; then npm run build --if-present; else echo "No build step"; fi
+      - name: Test
+        run: |
+          if [ -f package.json ]; then npm test --if-present; else echo "No tests"; fi
+      - name: Lint
+        run: |
+          if [ -f package.json ]; then npm run lint --if-present; else echo "No lint"; fi

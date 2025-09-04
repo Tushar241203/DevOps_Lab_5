@@ -1,0 +1,6 @@
+
+# Each line is a file pattern followed by one or more owners.
+# Example: all files request review from @org/devops-team
+*       @TanV-04 @virat-rana
+.github/ @TanV-04
+Project3_Branching_Model/ @TanV-04
