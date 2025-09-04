@@ -4,7 +4,6 @@ pipeline {
   environment {
     IMAGE = "rohit065/hello-node"
     VERSION = "${env.BUILD_NUMBER}"
-    NPM_CACHE = "C:/ProgramData/Jenkins/.npm"
   }
 
   options {
@@ -20,17 +19,12 @@ pipeline {
 
     stage('Unit tests (Dockerized)') {
       steps {
-        script {
-          // Mount safe npm cache directory
-          docker.image('node:18-alpine').inside("-v ${env.NPM_CACHE}:/root/.npm") {
-            bat '''
-              cd app
-              npm config set cache /root/.npm
-              npm ci || npm install
-              npm test
-            '''
-          }
-        }
+        bat '''
+          docker run --rm ^
+            -v "%WORKSPACE%":/app ^
+            -w /app/app ^
+            node:18-alpine sh -c "npm ci || npm install && npm test"
+        '''
       }
     }
 
